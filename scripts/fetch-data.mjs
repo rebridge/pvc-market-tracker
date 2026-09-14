@@ -14,9 +14,11 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const OUT_DIR = path.join(ROOT, "docs", "data");
+// Both can be overridden for offline tests (see README).
+const OUT_DIR = process.env.OUT_DIR || path.join(ROOT, "docs", "data");
 const CONFIG = path.join(ROOT, "series.json");
-const FRED_CSV = (id) => `https://fred.stlouisfed.org/graph/fredgraph.csv?id=${encodeURIComponent(id)}`;
+const FRED_BASE = process.env.FRED_BASE || "https://fred.stlouisfed.org/graph/fredgraph.csv?id=";
+const FRED_CSV = (id) => `${FRED_BASE}${encodeURIComponent(id)}`;
 const TIMEOUT_MS = 30_000;
 
 async function fetchCsv(url) {

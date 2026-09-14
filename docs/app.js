@@ -314,7 +314,7 @@
         if (c) { c.classList.toggle("is-hidden", far); c.setAttribute("cx", xOf(times[k][idx])); c.setAttribute("cy", yOf(pt[1])); }
         if (far) return "";
         const main = indexed ? fmtIdx(pt[1]) : fmtVal(pt[1], it.s);
-        const sub = indexed ? `<span class="u">${fmtVal(raw[1], it.s)} ${esc(it.s.units.replace(/^PPI, .*$/, "PPI"))}</span>` : "";
+        const sub = indexed ? `<span class="u">${fmtVal(raw[1], it.s)} ${esc(it.s.units.replace(/^PPI, .*$/, "PPI").replace(/^\$ ?/, ""))}</span>` : "";
         return `<div class="row" style="--c:${it.s.color}"><span class="dot"></span><span>${esc(it.s.short)} ${sub}</span><span class="v">${main}</span></div>`;
       }).join("");
       const dateStr = items[0].pts[i0][0];
