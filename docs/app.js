@@ -71,7 +71,7 @@
   }
   function xTicks(startMs, endMs) {
     const years = (endMs - startMs) / (365.25 * 86400000);
-    const stepMonths = years <= 1.5 ? 2 : years <= 3.5 ? 6 : years <= 12 ? 12 : years <= 25 ? 60 : 120;
+    const stepMonths = years <= 1.5 ? 2 : years <= 2.5 ? 3 : years <= 3.5 ? 6 : years <= 12 ? 12 : years <= 25 ? 60 : 120;
     const d = new Date(startMs); d.setUTCDate(1); d.setUTCHours(0, 0, 0, 0);
     if (stepMonths >= 12) { d.setUTCMonth(0); if (d.getTime() < startMs) d.setUTCFullYear(d.getUTCFullYear() + 1); }
     else if (d.getTime() < startMs) d.setUTCMonth(d.getUTCMonth() + 1);
@@ -147,7 +147,7 @@
     });
     $("#lag").addEventListener("input", (e) => { state.lag = +e.target.value; update(); });
     $("#tableBtn").addEventListener("click", () => { state.table = !state.table; update(); });
-    let t; window.addEventListener("resize", () => { clearTimeout(t); t = setTimeout(renderChart, 120); });
+    let t; window.addEventListener("resize", () => { clearTimeout(t); t = setTimeout(() => { renderSimple(); renderChart(); }, 120); });
   }
 
   // ---------- stat tiles ----------
@@ -248,10 +248,10 @@
     table.hidden = !state.table;
   }
 
-  function lineChart(items, { startMs, endMs, indexed, height, width }) {
+  function lineChart(items, { startMs, endMs, indexed, height, width, markers, endLabel }) {
     const W = Math.max(280, width || $("#chart").clientWidth || 800);
     const H = height || Math.min(420, Math.max(260, Math.round(W * 0.42)));
-    const M = { t: 16, r: indexed ? (W < 640 ? 92 : 118) : 16, b: 30, l: 52 };
+    const M = { t: 16, r: indexed ? (W < 640 ? 92 : 118) : endLabel ? 64 : 16, b: 30, l: 52 };
     const iw = W - M.l - M.r, ih = H - M.t - M.b;
     const all = items.flatMap((it) => it.pts.map((p) => p[1]));
     let { lo, hi, ticks } = niceTicks(Math.min(...all), Math.max(...all), 5);
@@ -260,12 +260,16 @@
     const y = (v) => M.t + ih - ((v - lo) / (hi - lo || 1)) * ih;
     const grid = ticks.map((t) => `<line x1="${M.l}" x2="${W - M.r}" y1="${y(t).toFixed(1)}" y2="${y(t).toFixed(1)}"/>`).join("");
     const yLabels = ticks.map((t) => `<text x="${M.l - 8}" y="${(y(t) + 4).toFixed(1)}" text-anchor="end">${indexed ? t : fmtAxis(t)}</text>`).join("");
-    const xt = xTicks(startMs, endMs).map((t) => `<text x="${x(t.ms).toFixed(1)}" y="${H - 8}" text-anchor="middle">${t.label}</text>`).join("");
+    // Thin the month labels until they have ~60px each, so narrow screens never overlap.
+    const allTicks = xTicks(startMs, endMs);
+    const every = Math.max(1, Math.ceil((allTicks.length * 60) / iw));
+    const xt = allTicks.filter((_, i) => i % every === 0).map((t) => `<text x="${x(t.ms).toFixed(1)}" y="${H - 8}" text-anchor="middle">${t.label}</text>`).join("");
     const hundred = indexed && 100 >= lo && 100 <= hi ? `<line class="hundred" x1="${M.l}" x2="${W - M.r}" y1="${y(100).toFixed(1)}" y2="${y(100).toFixed(1)}"/>` : "";
     const paths = items.map(({ s, pts }) => {
       const d = pts.map((p, i) => `${i ? "L" : "M"}${x(toDate(p[0]).getTime()).toFixed(1)},${y(p[1]).toFixed(1)}`).join("");
       const last = pts.at(-1);
-      return `<g class="series" data-key="${esc(s.key)}"><path d="${d}" stroke="${s.color}"/><circle class="end" cx="${x(toDate(last[0]).getTime()).toFixed(1)}" cy="${y(last[1]).toFixed(1)}" r="4" fill="${s.color}"/></g>`;
+      const dots = markers ? pts.slice(0, -1).map((p) => `<circle class="pt" cx="${x(toDate(p[0]).getTime()).toFixed(1)}" cy="${y(p[1]).toFixed(1)}" r="3" fill="${s.color}"/>`).join("") : "";
+      return `<g class="series" data-key="${esc(s.key)}"><path d="${d}" stroke="${s.color}"/>${dots}<circle class="end" cx="${x(toDate(last[0]).getTime()).toFixed(1)}" cy="${y(last[1]).toFixed(1)}" r="4" fill="${s.color}"/></g>`;
     }).join("");
     // Direct end labels, nudged apart so they never overlap.
     let labels = "";
@@ -274,6 +278,8 @@
       for (let i = 1; i < ends.length; i++) if (ends[i].y - ends[i - 1].y < 15) ends[i].y = ends[i - 1].y + 15;
       for (let i = ends.length - 1; i >= 0; i--) { const maxY = M.t + ih; if (ends[i].y > maxY) ends[i].y = maxY; if (i < ends.length - 1 && ends[i + 1].y - ends[i].y < 15) ends[i].y = ends[i + 1].y - 15; }
       labels = ends.map((e) => `<text class="endlabel" x="${W - M.r + 10}" y="${(e.y + 4).toFixed(1)}">${esc(e.s.short)} <tspan fill="var(--ink-3)" font-weight="400">${fmtIdx(e.v)}</tspan></text>`).join("");
+    } else if (endLabel) {
+      labels = items.map(({ s, pts }) => { const last = pts.at(-1); return `<text class="endlabel" x="${(x(toDate(last[0]).getTime()) + 10).toFixed(1)}" y="${(y(last[1]) + 4).toFixed(1)}">${fmtVal(last[1], s)}</text>`; }).join("");
     }
     return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${indexed ? "Indexed comparison chart" : "Price chart"}" data-l="${M.l}" data-r="${M.r}" data-w="${W}" data-h="${H}" data-t="${M.t}" data-ih="${ih}" data-start="${startMs}" data-end="${endMs}" data-lo="${lo}" data-hi="${hi}">
       <g class="grid">${grid}</g>
@@ -343,6 +349,24 @@
     el.innerHTML = `<table><thead><tr><th>Month</th>${head}</tr></thead><tbody>${rows}</tbody></table>`;
   }
 
+  // ---------- the simple view: resin index, last 24 months, one point per month ----------
+  function renderSimple() {
+    const sec = $("#simple");
+    const s = series.find((x) => x.key === "resin" && x.ok && x.obs.length) || series.find((x) => x.ok && x.freq === "monthly");
+    if (!s) { sec.hidden = true; return; }
+    sec.hidden = false;
+    const pts = s.monthly.slice(-24);
+    const last = pts.at(-1), prev = pts.at(-2), yearAgo = pts.length >= 13 ? pts.at(-13) : null;
+    const word = (p) => (p == null ? "unchanged" : p > 0.05 ? `up ${Math.abs(p).toFixed(1)}%` : p < -0.05 ? `down ${Math.abs(p).toFixed(1)}%` : "flat");
+    $("#simpleTitle").textContent = `Resin prices are ${word(pctChange(last, yearAgo))} from a year ago and ${word(pctChange(last, prev))} from the month before.`;
+    $("#simpleSub").textContent = `${fmtMonth(last[0])}: ${fmtVal(last[1], s)} on the ${s.label.toLowerCase()} index (${s.units}). Showing ${fmtMonth(pts[0][0])} to ${fmtMonth(last[0])}, one point per month.`;
+    $("#simpleFoot").textContent = `Producer Price Index for thermoplastic resins, U.S. Bureau of Labor Statistics. A new month is added automatically around the middle of each month, when the previous month's number is published.`;
+    const host = $("#simpleChart");
+    const item = { s, pts, raw: pts };
+    host.innerHTML = lineChart([item], { startMs: toDate(pts[0][0]).getTime(), endMs: toDate(last[0]).getTime(), indexed: false, height: 300, width: host.clientWidth, markers: true, endLabel: true });
+    wireHover(host, [item], { indexed: false });
+  }
+
   // ---------- learn panel ----------
   function renderAbout() {
     $("#about").innerHTML = series.map((s) => `
@@ -364,12 +388,13 @@
       $("#chartSub").textContent = "";
       $("#chart").innerHTML = `<div class="empty"><p>The first data pull has not run. In the repository, open <strong>Actions → Update data and publish → Run workflow</strong>, or run <code>node scripts/fetch-data.mjs</code> locally and commit the <code>docs/data</code> folder.</p><p style="color:var(--ink-3)">(${esc(err.message)})</p></div>`;
       $("#asofData").textContent = "—"; $("#asofRefresh").textContent = "—";
+      $("#simple").hidden = true;
       return;
     }
     // drop knobs that no longer match the series list
     state.off = state.off.filter((k) => series.some((s) => s.key === k));
     if (!RANGE_YEARS[state.range]) state.range = defaults.range;
-    renderHeader(); renderTiles(); renderAbout(); renderKnobs(); renderChart();
+    renderHeader(); renderSimple(); renderTiles(); renderAbout(); renderKnobs(); renderChart();
   }
   main();
 })();

@@ -32,6 +32,13 @@ series.json  ──►  scripts/fetch-data.mjs  ──►  docs/data/*.json  ─
    waiting for the schedule.
 4. Share the link: `https://rebridge.github.io/pvc-market-tracker/`
 
+## What's on the page
+
+The top of the page is the simple view Bobby asked for: the resin index over the last 24 months,
+one point per month, with a one-sentence readout. A new point appears automatically around the
+middle of each month when the Bureau of Labor Statistics publishes the previous month. Everything
+below it is the detailed comparison.
+
 ## Knobs on the page
 
 | Knob | What it does |
