@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resin Watch</title>
+<meta name="description" content="PVC resin market indicators for Salem Plastic Products: resin and pipe producer prices, crude oil and natural gas, refreshed automatically from FRED.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="mast">
+  <div class="mast-text">
+    <p class="eyebrow">Salem Plastic Products · Market indicators</p>
+    <h1>Resin Watch</h1>
+    <p class="lede">Oil is the headline everyone quotes, but U.S. PVC resin follows natural gas and ethylene more closely than crude. These four official price series are the free way to keep tabs on where resin is heading, and they refresh themselves every weekday morning.</p>
+  </div>
+  <dl class="asof" id="asof">
+    <div><dt>Data through</dt><dd id="asofData">…</dd></div>
+    <div><dt>Last refresh</dt><dd id="asofRefresh">…</dd></div>
+    <div><dt>Next refresh</dt><dd>Next weekday, 9:30 am ET</dd></div>
+  </dl>
+</header>
+
+<main>
+  <p class="notice" id="notice" hidden></p>
+
+  <section class="knobs" aria-label="Chart controls">
+    <div class="knob">
+      <span class="knob-label" id="rangeLabel">Time window</span>
+      <div class="seg" role="group" aria-labelledby="rangeLabel" id="rangeSeg">
+        <button type="button" data-range="1y">1 yr</button>
+        <button type="button" data-range="3y">3 yr</button>
+        <button type="button" data-range="5y">5 yr</button>
+        <button type="button" data-range="10y">10 yr</button>
+        <button type="button" data-range="all">All</button>
+      </div>
+    </div>
+    <div class="knob knob-wide">
+      <span class="knob-label" id="compareLabel">Lines on the chart</span>
+      <div class="chips" role="group" aria-labelledby="compareLabel" id="chips"></div>
+    </div>
+    <div class="knob">
+      <span class="knob-label" id="viewLabel">How to compare</span>
+      <div class="seg" role="group" aria-labelledby="viewLabel" id="viewSeg">
+        <button type="button" data-view="overlay">Same start = 100</button>
+        <button type="button" data-view="actual">Actual prices</button>
+      </div>
+    </div>
+    <div class="knob knob-lag">
+      <label class="knob-label" for="lag">Shift oil &amp; gas forward <output id="lagOut" for="lag">0 months</output></label>
+      <input type="range" id="lag" min="0" max="6" step="1" value="0">
+      <p class="knob-help">Feedstock moves first; resin contracts catch up later. Slide to see how many months of lag lines the peaks up.</p>
+    </div>
+  </section>
+
+  <section class="tiles" id="tiles" aria-label="Latest readings"></section>
+
+  <section class="chart-card">
+    <header class="chart-head">
+      <div>
+        <h2 id="chartTitle">Loading…</h2>
+        <p class="chart-sub" id="chartSub"></p>
+      </div>
+      <button type="button" class="ghost" id="tableBtn" aria-pressed="false">Show table</button>
+    </header>
+    <div class="chart-area" id="chart"></div>
+    <ul class="legend" id="legend"></ul>
+    <div class="table-wrap" id="table" hidden></div>
+  </section>
+
+  <section class="learn">
+    <article class="learn-col">
+      <h2>How U.S. PVC gets priced</h2>
+      <ol class="steps">
+        <li><strong>Salt and gas, not oil.</strong> By weight PVC is roughly 57% chlorine and 43% ethylene. U.S. ethylene is cracked from ethane, a natural gas liquid, and chlorine is made by running electricity through brine. So the domestic cost floor tracks natural gas and power, not crude.</li>
+        <li><strong>Oil matters overseas, and for exports.</strong> In Europe and Asia ethylene comes from naphtha, which is refined from crude. When oil spikes, foreign PVC gets expensive, U.S. producers can export at better prices, and domestic supply tightens. That is the main way a $100 barrel reaches a pipe plant in North Carolina.</li>
+        <li><strong>Prices settle monthly, in cents per pound.</strong> Producers announce increases, large buyers push back, and the trade press reports the settlement. The Producer Price Index for thermoplastic resins is the official echo of those settlements, published mid-month for the prior month.</li>
+        <li><strong>Demand is construction.</strong> Most PVC goes into pipe, siding, windows and fittings, so housing starts, municipal water projects and interest rates move demand as much as feedstock moves cost.</li>
+        <li><strong>Expect a lag.</strong> Gas and oil react in days; resin contracts reset over one to three months. That is the reason for the shift slider above.</li>
+      </ol>
+    </article>
+    <article class="learn-col">
+      <h2>About each line</h2>
+      <dl class="about" id="about"></dl>
+      <h2>Who makes North American PVC</h2>
+      <p>The market is concentrated. The largest producers are <strong>Shintech</strong> (Shin-Etsu Chemical of Japan, plants in Louisiana and Texas), <strong>Westlake</strong> (Houston), <strong>Formosa Plastics USA</strong>, <strong>OxyVinyls</strong> (Occidental Petroleum) and <strong>Orbia</strong> (formerly Mexichem, through its Vestolit business). When a few of these announce a price move or an outage, the whole market feels it.</p>
+      <h2>Where the pros look</h2>
+      <ul class="links">
+        <li><a href="https://www.ptonline.com/topics/resin-pricing" rel="noopener">Plastics Technology resin price reports</a> — free monthly commentary on PVC, PE and PP moves.</li>
+        <li><a href="https://www.plasticsnews.com/resin-prices/north-america/" rel="noopener">Plastics News resin pricing</a> — the chart Bobby remembers; now subscriber-only.</li>
+        <li><a href="https://www.chemorbis.com/en/free-pvc-prices-news" rel="noopener">ChemOrbis free PVC news</a> — global spot prices and producer announcements.</li>
+        <li><a href="https://fred.stlouisfed.org/series/WPU0662" rel="noopener">FRED, the St. Louis Fed's data service</a> — where every number on this page comes from.</li>
+      </ul>
+    </article>
+  </section>
+</main>
+
+<footer class="foot">
+  <p>Sources: U.S. Bureau of Labor Statistics and U.S. Energy Information Administration, retrieved through FRED. Daily oil and gas prices are averaged to months when drawn next to monthly indexes. Nothing here is a price quote.</p>
+  <p>Updates itself with a scheduled job in <a href="https://github.com/rebridge/pvc-market-tracker" rel="noopener">the pvc-market-tracker repository</a>.</p>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>
