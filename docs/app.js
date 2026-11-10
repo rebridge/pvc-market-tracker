@@ -6,6 +6,9 @@
   const RANGE_YEARS = { "1y": 1, "3y": 3, "5y": 5, "10y": 10, all: Infinity };
   const STORE_KEY = "resin-watch-knobs-v1";
   const MONTH_MS = 30.44 * 86400000;
+  // Matches the cron in .github/workflows/update-data.yml ("30 13 * * 1-5").
+  const REFRESH_UTC_HOUR = 13, REFRESH_UTC_MIN = 30;
+  const STALE_AFTER_MISSED = 3;   // warn once three weekday refreshes have come and gone with no new data
 
   // ---------- state ----------
   const defaults = { range: "5y", view: "overlay", off: [], lag: 0, table: false };
@@ -110,12 +113,30 @@
     $("#asofData").textContent = resin ? (resin.freq === "monthly" ? fmtMonth(resin.obs.at(-1)[0]) : fmtDay(resin.obs.at(-1)[0])) : "—";
     $("#asofRefresh").textContent = manifest?.generated ? fmtStamp(manifest.generated) : "—";
     const problems = series.filter((s) => s.error);
+    const msgs = problems.map((s) => `${s.short}: ${s.error}`);
+    const missed = manifest?.generated ? missedRefreshes(new Date(manifest.generated), new Date()) : 0;
+    if (missed >= STALE_AFTER_MISSED) {
+      msgs.unshift(`These numbers may be out of date: the last refresh was ${fmtStamp(manifest.generated)}, and ${missed} scheduled weekday refreshes have passed since. Check the Actions tab of the repository for a failed or paused run.`);
+    }
     const notice = $("#notice");
-    if (problems.length) {
+    if (msgs.length) {
       notice.hidden = false;
-      notice.classList.toggle("error", problems.some((s) => !s.ok));
-      notice.textContent = problems.map((s) => `${s.short}: ${s.error}`).join(" · ");
+      notice.classList.toggle("error", problems.some((s) => !s.ok) || missed >= STALE_AFTER_MISSED);
+      notice.textContent = msgs.join(" · ");
     } else notice.hidden = true;
+  }
+  // Count the weekday 13:30 UTC refresh slots (the workflow's cron) strictly after `from` and up to `to`.
+  // GitHub can run scheduled jobs late, so the caller allows a little slack before warning.
+  function missedRefreshes(from, to) {
+    if (!(from < to)) return 0;
+    let n = 0;
+    const d = new Date(Date.UTC(from.getUTCFullYear(), from.getUTCMonth(), from.getUTCDate(), REFRESH_UTC_HOUR, REFRESH_UTC_MIN));
+    if (d <= from) d.setUTCDate(d.getUTCDate() + 1);
+    for (; d <= to && n < 1000; d.setUTCDate(d.getUTCDate() + 1)) {
+      const wd = d.getUTCDay();
+      if (wd !== 0 && wd !== 6) n++;
+    }
+    return n;
   }
 
   // ---------- knobs ----------
