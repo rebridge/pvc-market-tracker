@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-04T20:29:48.940Z",
+  "generated": "2026-11-12T21:00:19.113Z",
   "generator": "scripts/fetch-data.mjs",
   "series": [
     {
@@ -68,10 +68,10 @@
       "url": "https://fred.stlouisfed.org/series/DHHNGSP",
       "note": "U.S. PVC is made from ethylene cracked from ethane, a natural gas liquid, plus chlorine made with a lot of electricity. That makes natural gas the more direct cost indicator for domestic PVC than crude oil.",
       "ok": true,
-      "updated": "2026-11-04T20:29:48.940Z",
-      "latestDate": "2026-11-03",
-      "latestValue": 2.63,
-      "count": 5722,
+      "updated": "2026-11-12T21:00:19.113Z",
+      "latestDate": "2026-11-11",
+      "latestValue": 3,
+      "count": 5728,
       "error": null
     }
   ]
