@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-12T21:00:19.113Z",
+  "generated": "2026-11-13T20:36:37.808Z",
   "generator": "scripts/fetch-data.mjs",
   "series": [
     {
@@ -14,10 +14,10 @@
       "url": "https://fred.stlouisfed.org/series/WPU0662",
       "note": "Producer Price Index for thermoplastic resins and plastics materials. PVC sits in this basket alongside polyethylene, polypropylene and polystyrene. It is the closest free, official stand-in for the PVC contract price Plastics News used to publish.",
       "ok": true,
-      "updated": "2026-10-15T17:51:00.013Z",
-      "latestDate": "2026-09-01",
-      "latestValue": 278.148,
-      "count": 550,
+      "updated": "2026-11-13T20:36:37.808Z",
+      "latestDate": "2026-10-01",
+      "latestValue": 286.777,
+      "count": 551,
       "error": null
     },
     {
@@ -32,10 +32,10 @@
       "url": "https://fred.stlouisfed.org/series/PCU326122326122",
       "note": "Producer Price Index for U.S. plastics pipe and pipe fitting manufacturers. This is the selling-price side of the business, so the gap between it and the resin index is a rough read on converter margins.",
       "ok": true,
-      "updated": "2026-10-15T17:51:00.013Z",
-      "latestDate": "2026-09-01",
-      "latestValue": 455.493,
-      "count": 400,
+      "updated": "2026-11-13T20:36:37.808Z",
+      "latestDate": "2026-10-01",
+      "latestValue": 450.229,
+      "count": 401,
       "error": null
     },
     {
@@ -50,10 +50,10 @@
       "url": "https://fred.stlouisfed.org/series/DCOILWTICO",
       "note": "West Texas Intermediate crude at Cushing, Oklahoma. Oil drives PVC costs in Europe and Asia, where ethylene is made from naphtha. In the U.S. its effect on PVC is indirect: it moves sentiment, freight and export pricing more than it moves the resin's own feedstock cost.",
       "ok": true,
-      "updated": "2026-11-04T20:29:48.940Z",
-      "latestDate": "2026-11-03",
-      "latestValue": 99.64,
-      "count": 9537,
+      "updated": "2026-11-13T20:36:37.808Z",
+      "latestDate": "2026-11-11",
+      "latestValue": 89.62,
+      "count": 9543,
       "error": null
     },
     {
