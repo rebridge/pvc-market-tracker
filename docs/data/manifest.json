@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-13T20:36:37.808Z",
+  "generated": "2026-11-18T21:31:05.216Z",
   "generator": "scripts/fetch-data.mjs",
   "series": [
     {
@@ -50,10 +50,10 @@
       "url": "https://fred.stlouisfed.org/series/DCOILWTICO",
       "note": "West Texas Intermediate crude at Cushing, Oklahoma. Oil drives PVC costs in Europe and Asia, where ethylene is made from naphtha. In the U.S. its effect on PVC is indirect: it moves sentiment, freight and export pricing more than it moves the resin's own feedstock cost.",
       "ok": true,
-      "updated": "2026-11-13T20:36:37.808Z",
-      "latestDate": "2026-11-11",
-      "latestValue": 89.62,
-      "count": 9543,
+      "updated": "2026-11-18T21:31:05.216Z",
+      "latestDate": "2026-11-17",
+      "latestValue": 89.53,
+      "count": 9547,
       "error": null
     },
     {
@@ -68,10 +68,10 @@
       "url": "https://fred.stlouisfed.org/series/DHHNGSP",
       "note": "U.S. PVC is made from ethylene cracked from ethane, a natural gas liquid, plus chlorine made with a lot of electricity. That makes natural gas the more direct cost indicator for domestic PVC than crude oil.",
       "ok": true,
-      "updated": "2026-11-12T21:00:19.113Z",
-      "latestDate": "2026-11-11",
-      "latestValue": 3,
-      "count": 5728,
+      "updated": "2026-11-18T21:31:05.216Z",
+      "latestDate": "2026-11-17",
+      "latestValue": 3.1,
+      "count": 5732,
       "error": null
     }
   ]
