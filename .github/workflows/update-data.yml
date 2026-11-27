@@ -6,6 +6,11 @@ on:
     # gas prices in the morning; the monthly PPI lands mid-month and is picked up the same day.
     - cron: "30 13 * * 1-5"
   workflow_dispatch:
+    inputs:
+      send_test_email:
+        description: "Send the update email now, even if there is no new month (to check the email setup)"
+        type: boolean
+        default: false
   push:
     branches: [main]
     paths:
@@ -27,6 +32,8 @@ jobs:
   update:
     name: Pull latest prices
     runs-on: ubuntu-latest
+    outputs:
+      send_email: ${{ steps.email.outputs.send }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -36,8 +43,27 @@ jobs:
         with:
           node-version: "22"
 
+      - name: Remember what the data looked like before this pull
+        run: cp docs/data/manifest.json "$RUNNER_TEMP/manifest.prev.json" || true
+
       - name: Fetch series from FRED
         run: node scripts/fetch-data.mjs
+
+      - name: Write update email if a new month landed
+        id: email
+        env:
+          PREV_MANIFEST: ${{ runner.temp }}/manifest.prev.json
+          EMAIL_DIR: ${{ runner.temp }}/email
+          FORCE: ${{ inputs.send_test_email || false }}
+        run: node scripts/build-email.mjs
+
+      - name: Keep the email for the notify job
+        if: steps.email.outputs.send == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: update-email
+          path: ${{ runner.temp }}/email
+          retention-days: 3
 
       - name: Commit refreshed data
         run: |
@@ -78,3 +104,31 @@ jobs:
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
+
+  notify:
+    name: Email the update
+    # Runs after the page is live, so the link shows the new month. Skipped until
+    # the NOTIFY_TO repository variable is set (see README, "Email when it updates").
+    needs: [update, deploy]
+    if: needs.update.outputs.send_email == 'true' && vars.NOTIFY_TO != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: update-email
+          path: email
+      - name: Read subject
+        id: subj
+        run: echo "subject=$(cat email/subject.txt)" >> "$GITHUB_OUTPUT"
+      - name: Send
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT || 587 }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          from: ${{ vars.NOTIFY_FROM || secrets.SMTP_USERNAME }}
+          to: ${{ vars.NOTIFY_TO }}
+          subject: ${{ steps.subj.outputs.subject }}
+          body: file://email/body.txt
+          html_body: file://email/body.html
