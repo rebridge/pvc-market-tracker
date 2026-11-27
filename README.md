@@ -39,6 +39,28 @@ one point per month, with a one-sentence readout. A new point appears automatica
 middle of each month when the Bureau of Labor Statistics publishes the previous month. Everything
 below it is the detailed comparison.
 
+## Email when it updates
+
+The workflow can email Bobby (or anyone) when a **new month** of the resin or pipe price index
+lands, usually once a month around mid-month, a few minutes after the page republishes. Oil and gas
+change most weekdays, so they don't trigger an email on their own; their latest numbers ride along
+in the monthly one. `scripts/build-email.mjs` writes the message: the same one-sentence readout as
+the page, a small table of all four indicators, and a link to the dashboard.
+
+It stays off until you add these in **Settings → Secrets and variables → Actions**:
+
+| Kind | Name | What to put |
+|---|---|---|
+| Variable | `NOTIFY_TO` | Recipient address(es), comma-separated |
+| Variable | `NOTIFY_FROM` | Optional "From" address; defaults to the SMTP username |
+| Secret | `SMTP_SERVER` | e.g. `smtp.office365.com` or `smtp.gmail.com` |
+| Secret | `SMTP_PORT` | Optional; defaults to `587` |
+| Secret | `SMTP_USERNAME` | The mailbox that sends |
+| Secret | `SMTP_PASSWORD` | Its password or app password |
+
+To check the setup without waiting a month: **Actions → Update data and publish → Run workflow**,
+tick *Send the update email now*, and run it on `main`. The test email's subject starts with `[Test]`.
+
 ## Knobs on the page
 
 | Knob | What it does |
